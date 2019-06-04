@@ -1,5 +1,6 @@
-'''
+"""
   Copyright (C) 2016 Bastille Networks
+  Copyright (C) 2019 Matthias Deeg, SySS GmbH
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -13,48 +14,50 @@
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+"""
+
+import argparse
+import logging
+from .nrf24 import *
+
+channels = []                               # nRF24 radio channels
+args = None                                 # command line arguments
+parser = None                               # command line argument parser
+radio = None                                # nRF24 radio
 
 
-import logging, argparse
-from nrf24 import *
-
-channels = []
-args = None
-parser = None
-radio = None
-
-# Initialize the argument parser
 def init_args(description):
+    """Initialize the argument parser"""
 
-  global parser
-  parser = argparse.ArgumentParser(description,
-    formatter_class=lambda prog: argparse.HelpFormatter(prog,max_help_position=50,width=120))
-  parser.add_argument('-c', '--channels', type=int, nargs='+', help='RF channels', default=range(2, 84), metavar='N')
-  parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output', default=False)
-  parser.add_argument('-l', '--lna', action='store_true', help='Enable the LNA (for CrazyRadio PA dongles)', default=False)
-  parser.add_argument('-i', '--index', type=int, help='Dongle index', default=0)
+    global parser
+    parser = argparse.ArgumentParser(description, formatter_class=lambda prog:
+                                     argparse.HelpFormatter(prog,max_help_position=50,width=120))
+    parser.add_argument('-c', '--channels', type=int, nargs='+', help='RF channels', default=range(2, 84), metavar='N')
+    parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output', default=False)
+    parser.add_argument('-l', '--lna', action='store_true', help='Enable the LNA (for CrazyRadio PA dongles)', default=False)
+    parser.add_argument('-i', '--index', type=int, help='Dongle index', default=0)
 
-# Parse and process common comand line arguments
+
 def parse_and_init():
+    """Parse and process common comand line arguments"""
 
-  global parser
-  global args
-  global channels
-  global radio
+    global parser
+    global args
+    global channels
+    global radio
 
-  # Parse the command line arguments
-  args = parser.parse_args()
+    # Parse the command line arguments
+    args = parser.parse_args()
 
-  # Setup logging
-  level = logging.DEBUG if args.verbose else logging.INFO
-  logging.basicConfig(level=level, format='[%(asctime)s.%(msecs)03d]  %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
+    # Setup logging
+    level = logging.DEBUG if args.verbose else logging.INFO
+    logging.basicConfig(level=level, format='[%(asctime)s.%(msecs)03d]  %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
 
-  # Set the channels
-  channels = args.channels
-  logging.debug('Using channels {0}'.format(', '.join(str(c) for c in channels)))
+    # Set the channels
+    channels = args.channels
+    logging.debug('Using channels {0}'.format(', '.join(str(c) for c in channels)))
 
-  # Initialize the radio
-  radio = nrf24(args.index)
-  if args.lna: radio.enable_lna()
-
+    # Initialize the radio
+    radio = nrf24(args.index)
+    if args.lna:
+        radio.enable_lna()
