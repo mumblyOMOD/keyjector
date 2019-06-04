@@ -1,5 +1,7 @@
-#!/usr/bin/env python2
-'''
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
   Copyright (C) 2016 Bastille Networks
 
   This program is free software: you can redistribute it and/or modify
@@ -14,10 +16,8 @@
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+"""
 
-
-import time, logging
 from lib import common
 
 # Parse command line arguments and initialize the radio
@@ -32,5 +32,4 @@ common.radio.enter_tone_test_mode()
 
 # Run indefinitely
 while True:
-  pass
-
+    pass

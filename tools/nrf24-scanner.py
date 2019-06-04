@@ -1,5 +1,7 @@
-#!/usr/bin/env python2
-'''
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
   Copyright (C) 2016 Bastille Networks
 
   This program is free software: you can redistribute it and/or modify
@@ -14,10 +16,12 @@
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+"""
 
+import logging
+import time
 
-import time, logging
+from binascii import unhexlify
 from lib import common
 
 # Parse command line arguments and initialize the radio
@@ -29,14 +33,20 @@ common.parser.add_argument('-A', '--addrlen', type=int, choices=[2, 3, 4, 5], de
 common.parse_and_init()
 
 # Parse the prefix addresses
-prefix_address = common.args.prefix.replace(':', '').decode('hex')
+# prefix_address = common.args.prefix.replace(':', '').decode('hex')
+prefix_address = unhexlify(common.args.prefix.replace(':', ''))
+
+
 if len(prefix_address) > 5:
-  raise Exception('Invalid prefix address: {0}'.format(args.address))
+    raise Exception('Invalid prefix address: {0}'.format(args.address))
 
 # Put the radio in promiscuous mode
 rate = common.RF_RATE_2M
-if common.args.rate == '1M': rate = common.RF_RATE_1M
-elif common.args.rate == '250K': rate = common.RF_RATE_250K
+if common.args.rate == '1M':
+    rate = common.RF_RATE_1M
+elif common.args.rate == '250K':
+    rate = common.RF_RATE_250K
+
 addrlen = common.args.addrlen
 common.radio.enter_promiscuous_mode(prefix_address, rate=rate, addrlen=addrlen)
 
@@ -51,24 +61,22 @@ last_tune = time.time()
 channel_index = 0
 while True:
 
-  # Increment the channel
-  if len(common.channels) > 1 and time.time() - last_tune > dwell_time:
-    channel_index = (channel_index + 1) % (len(common.channels))
-    common.radio.set_channel(common.channels[channel_index])
-    last_tune = time.time()
+    # Increment the channel
+    if len(common.channels) > 1 and time.time() - last_tune > dwell_time:
+        channel_index = (channel_index + 1) % (len(common.channels))
+        common.radio.set_channel(common.channels[channel_index])
+        last_tune = time.time()
 
-  # Receive payloads
-  value = common.radio.receive_payload()
-  if len(value) >= addrlen:
+    # Receive payloads
+    value = common.radio.receive_payload()
+    if len(value) >= addrlen:
 
-    # Split the address and payload
-    address, payload = value[0:addrlen], value[addrlen:]
+        # Split the address and payload
+        address, payload = value[0:addrlen], value[addrlen:]
 
-    # Log the packet
-    logging.info('{0: >2}  {1: >2}  {2}  {3}'.format(
-              common.channels[channel_index],
-              len(payload),
-              ':'.join('{:02X}'.format(b) for b in address),
-              ':'.join('{:02X}'.format(b) for b in payload)))
-
-
+        # Log the packet
+        logging.info('{0: >2}  {1: >2}  {2}  {3}'.format(
+                common.channels[channel_index],
+                len(payload),
+                ':'.join('{:02X}'.format(b) for b in address),
+                ':'.join('{:02X}'.format(b) for b in payload)))

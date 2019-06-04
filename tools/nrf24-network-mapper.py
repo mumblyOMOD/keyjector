@@ -1,5 +1,7 @@
-#!/usr/bin/env python2
-'''
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
   Copyright (C) 2016 Bastille Networks
 
   This program is free software: you can redistribute it and/or modify
@@ -14,10 +16,9 @@
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+"""
 
-
-import time, logging
+import logging
 from lib import common
 
 # Parse command line arguments and initialize the radio
@@ -32,7 +33,7 @@ common.parse_and_init()
 address = common.args.address.replace(':', '').decode('hex')[::-1][:5]
 address_string = ':'.join('{:02X}'.format(ord(b)) for b in address[::-1])
 if len(address) < 2:
-  raise Exception('Invalid address: {0}'.format(common.args.address))
+    raise Exception('Invalid address: {0}'.format(common.args.address))
 
 # Put the radio in sniffer mode (ESB w/o auto ACKs)
 common.radio.enter_sniffer_mode(address)
@@ -49,25 +50,25 @@ retries = max(0, min(common.args.retries, 15))
 valid_addresses = []
 for p in range(2):
 
-  # Step through each potential address
-  for b in range(256):
+    # Step through each potential address
+    for b in range(256):
 
-    try_address = chr(b) + address[1:]
-    logging.info('Trying address {0}'.format(':'.join('{:02X}'.format(ord(b)) for b in try_address[::-1])))
-    common.radio.enter_sniffer_mode(try_address)
+        try_address = chr(b) + address[1:]
+        logging.info('Trying address {0}'.format(':'.join('{:02X}'.format(ord(b)) for b in try_address[::-1])))
+        common.radio.enter_sniffer_mode(try_address)
 
     # Step through each channel
-    for c in range(len(common.args.channels)):
-      common.radio.set_channel(common.channels[c])
+        for c in range(len(common.args.channels)):
+            common.radio.set_channel(common.channels[c])
 
-      # Attempt to ping the address
-      if common.radio.transmit_payload(ping_payload, ack_timeout, retries):
-        valid_addresses.append(try_address)
-        logging.info('Successful ping of {0} on channel {1}'.format(
-          ':'.join('{:02X}'.format(ord(b)) for b in try_address[::-1]),
-          common.channels[c]))
+            # Attempt to ping the address
+            if common.radio.transmit_payload(ping_payload, ack_timeout, retries):
+                valid_addresses.append(try_address)
+                logging.info('Successful ping of {0} on channel {1}'.format(
+                ':'.join('{:02X}'.format(ord(b)) for b in try_address[::-1]),
+                common.channels[c]))
 
 # Print the results
 valid_addresses = list(set(valid_addresses))
 for addr in valid_addresses:
-  logging.info('Found address {0}'.format(':'.join('{:02X}'.format(ord(b)) for b in addr[::-1])))
+    logging.info('Found address {0}'.format(':'.join('{:02X}'.format(ord(b)) for b in addr[::-1])))
