@@ -1,4 +1,4 @@
-from protocol import Protocol
+from .protocol import Protocol
 from lib import common
 from collections import deque
 from threading import Thread
@@ -36,7 +36,7 @@ class TBBSC(Protocol):
 
 
   def send_hid_event(self, scan_code=0, shift=False, ctrl=False, win=False):
-    
+
     # Keystroke modifiers
     modifiers = 0x00
     if shift: modifiers |= 0x20
@@ -59,4 +59,4 @@ class TBBSC(Protocol):
 
   # Leave injection mode
   def stop_injection(self):
-    return       
+    return

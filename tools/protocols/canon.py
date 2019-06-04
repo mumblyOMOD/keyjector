@@ -1,4 +1,4 @@
-from protocol import Protocol
+from .protocol import Protocol
 from lib import common
 from threading import Thread
 from collections import deque
@@ -16,7 +16,7 @@ class Canon(Protocol):
     super(Canon, self).__init__("Canon")
 
     self.CRC16 = crcmod.mkCrcFun(0x11021, initCrc=0x0000, rev=True, xorOut=0x0000)
-  
+
     self.LUT = [0]*256
     lut = [0x0, 0x8, 0x4, 0xC, 0x2, 0xA, 0x6, 0xE, 0x1, 0x9, 0x5, 0xD, 0x3, 0xB, 0x7, 0xF]
     for x in range(256):
@@ -53,7 +53,7 @@ class Canon(Protocol):
     if ctrl: modifiers |= 0x01
     if win: modifiers |= 0x08
     idx = 2
-    pld = pld[0:idx] + chr(modifiers) + pld[idx+1:]    
+    pld = pld[0:idx] + chr(modifiers) + pld[idx+1:]
 
     # Update the 1-byte checksum
     pld = pld[0:9] + chr(sum([ord(p) for p in pld[0:9]])&0xFF) + pld[10:]
@@ -104,7 +104,7 @@ class Canon(Protocol):
         for x in range(25):
           common.radio.transmit_payload_generic(address="\xAA\xAA\xAA",
             payload="\xAC\xC5\x05"+''.join(chr(c) for c in payload)+"\xff\xff")
-      
+
       # No queue items; transmit a dummy packet
       else:
         self.tx_queue.append(self.build_packet(0, False, False, False))
