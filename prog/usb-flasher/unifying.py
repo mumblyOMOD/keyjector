@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 '''
   Copyright (C) 2016 Bastille Networks
 
@@ -16,7 +16,10 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import usb, logging, time, sys, struct, os
+import logging
+import sys
+import time
+import usb
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s.%(msecs)03d]  %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
@@ -24,8 +27,8 @@ logging.basicConfig(level=logging.INFO, format='[%(asctime)s.%(msecs)03d]  %(mes
 # Check pyusb dependency
 try:
   from usb import core as _usb_core
-except ImportError, ex:
-  print '''
+except ImportError as ex:
+  print ('''
 ------------------------------------------
 | PyUSB was not found or is out of date. |
 ------------------------------------------
@@ -33,7 +36,7 @@ except ImportError, ex:
 Please update PyUSB using pip:
 
 sudo pip install -U -I pip && sudo pip install -U -I pyusb
-'''
+''')
   sys.exit(1)
 
 # Sufficiently long timeout for use in a VM
@@ -127,19 +130,19 @@ class unifying_dongle:
     # when a Logitech dongle is first plugged in (and not used as an HID/HID++ device).
     # The following code makes everything work, but it's magic for the moment.
     try:
-      self.send_command(0x21, 0x09, 0x0210, 0x0002, "\x10\xFF\x81\xF1\x00\x00\x00", ep=0x83)
+      self.send_command(0x21, 0x09, 0x0210, 0x0002, b"\x10\xFF\x81\xF1\x00\x00\x00", ep=0x83)
     except Exception:
       pass
 
     # Request the firmware version
-    response = self.send_command(0x21, 0x09, 0x0210, 0x0002, "\x10\xFF\x81\xF1\x01\x00\x00", ep=0x83)
+    response = self.send_command(0x21, 0x09, 0x0210, 0x0002, b"\x10\xFF\x81\xF1\x01\x00\x00", ep=0x83)
     if response[5] != 0x12:
       logging.info('Incompatible Logitech Unifying dongle (type {:02X}). Only Nordic Semiconductor based dongles are supported.'.format(response[5]))
       sys.exit(1)
 
     # Tell the dongle to reset into firmware update mode
     try:
-      self.send_command(0x21, 0x09, 0x0210, 0x0002, "\x10\xFF\x80\xF0\x49\x43\x50", ep=0x83)
+      self.send_command(0x21, 0x09, 0x0210, 0x0002, b"\x10\xFF\x80\xF0\x49\x43\x50", ep=0x83)
     except usb.core.USBError:
 
       # An I/O error is possible here when the device resets before we can read the USB response

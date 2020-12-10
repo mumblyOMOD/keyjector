@@ -19,19 +19,21 @@
 """
 
 import logging
+import codecs
 from lib import common
 
 # Parse command line arguments and initialize the radio
 common.init_args('./nrf24-network-mapper.py')
 common.parser.add_argument('-a', '--address', type=str, help='Known address', required=True)
 common.parser.add_argument('-k', '--ack_timeout', type=int, help='ACK timeout in microseconds, accepts [250,4000], step 250', default=500)
-common.parser.add_argument('-r', '--retries', type=int, help='Auto retry limit, accepts [0,15]', default='5', choices=xrange(0, 16), metavar='RETRIES')
+common.parser.add_argument('-r', '--retries', type=int, help='Auto retry limit, accepts [0,15]', default='5', choices=range(0, 16), metavar='RETRIES')
 common.parser.add_argument('-p', '--ping_payload', type=str, help='Ping payload, ex 0F:0F:0F:0F', default='0F:0F:0F:0F', metavar='PING_PAYLOAD')
 common.parse_and_init()
 
 # Parse the address
-address = common.args.address.replace(':', '').decode('hex')[::-1][:5]
-address_string = ':'.join('{:02X}'.format(ord(b)) for b in address[::-1])
+address = codecs.decode(common.args.address.replace(':', ''), 'hex')[::-1][:5]
+#address_string = ':'.join('{:02X}'.format(ord(b)) for b in address[::-1])
+address_string = ':'.join('{:02X}'.format(b) for b in address[::-1])
 if len(address) < 2:
     raise Exception('Invalid address: {0}'.format(common.args.address))
 
@@ -39,7 +41,7 @@ if len(address) < 2:
 common.radio.enter_sniffer_mode(address)
 
 # Parse the ping payload
-ping_payload = common.args.ping_payload.replace(':', '').decode('hex')
+ping_payload = codecs.decode(common.args.ping_payload.replace(':', ''), 'hex')
 
 # Format the ACK timeout and auto retry values
 ack_timeout = int(common.args.ack_timeout / 250) - 1
@@ -52,8 +54,8 @@ for p in range(2):
 
     # Step through each potential address
     for b in range(256):
-
-        try_address = chr(b) + address[1:]
+        try_address = chr(b) + str(address[1:])
+        #logging.info('Trying address {0}'.format(':'.join('{:02X}'.format(ord(b)) for b in try_address[::-1])))
         logging.info('Trying address {0}'.format(':'.join('{:02X}'.format(ord(b)) for b in try_address[::-1])))
         common.radio.enter_sniffer_mode(try_address)
 

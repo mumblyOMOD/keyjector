@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -108,7 +108,10 @@ class nrf24:
     def enter_sniffer_mode(self, address, rate=RF_RATE_2M):
         """Put the radio in ESB "sniffer" mode (ESB mode w/o auto-acking)"""
 
-        data = struct.pack("BB", rate, len(address)) + address
+        if type(address) == str:
+            data = struct.pack("BB", rate, len(address)) + bytes(address, 'utf8')
+        else:
+            data = struct.pack("BB", rate, len(address)) + bytes(address)
         self.send_usb_command(ENTER_SNIFFER_MODE, data)
         self.dongle.read(0x81, 64, timeout=nrf24.usb_timeout)
         logging.debug('Entered sniffer mode with address {0}'.format(address))
@@ -138,7 +141,10 @@ class nrf24:
     def transmit_payload(self, payload, timeout=4, retransmits=15):
         """Transmit an ESB payload"""
 
-        data = struct.pack("BBB", len(payload), timeout, retransmits) + payload
+        if type(payload) == str:
+            data = struct.pack("BBB", len(payload), timeout, retransmits) + bytes(payload, 'utf8')
+        else:
+            data = struct.pack("BBB", len(payload), timeout, retransmits) + bytes(payload)
         self.send_usb_command(TRANSMIT_PAYLOAD, data)
         return self.dongle.read(0x81, 64, timeout=nrf24.usb_timeout)[0] > 0
 

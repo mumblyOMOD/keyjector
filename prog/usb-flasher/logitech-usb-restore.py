@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 '''
   Copyright (C) 2016 Bastille Networks
 
@@ -15,13 +15,14 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-
+import sys
+import logging
 from unifying import *
 import subprocess
 
 # Make sure a firmware image path was passed in
 if len(sys.argv) < 3:
-  print "Usage: sudo ./logitech-usb-flash.py [firmware-image.hex]"
+  print("Usage: sudo ./logitech-usb-flash.py [firmware-image.hex]")
 
 # Read in the firmware image
 with open(sys.argv[1]) as f:
